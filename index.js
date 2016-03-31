@@ -15,10 +15,21 @@ var isAbsolute = function (p) {
   return normal === absolute;
 };
 
+var isUrl = function (url) {
+  if (!url) { return false; }
+
+  // protocol relative URLs
+  if (url.indexOf('//') === 0 && validator.isURL(url, { allow_protocol_relative_urls: true })) {
+    return true;
+  }
+
+  return validator.isURL(url, { require_protocol: true });
+}
+
 var rebaseUrls = function (css, options) {
   return rework(css)
     .use(reworkUrl(function (url) {
-      if (isAbsolute(url) || validator.isURL(url) || /^(data:.*;.*,)/.test(url)) {
+      if (isAbsolute(url) || isUrl(url) || /^(data:.*;.*,)/.test(url)) {
         return url;
       }
 

@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "rework": "^1.0.1",
-    "rework-plugin-url": "^1.0.1",
+    "rework-plugin-url": "^1.1.0",
     "through2": "^0.6.5",
     "validator": "^3.39.0"
   },
