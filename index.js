@@ -91,6 +91,14 @@ var rebaseUrls = function (css, options) {
     })).toString();
 };
 
+function urlRebaseStream() {
+  function prefixStream(prefixText) {
+    var stream = through();
+    stream.write(prefixText);
+    return stream;
+  }
+}
+
 module.exports = function (options) {
   options = options || {};
   var root = options.root || '.';
@@ -118,6 +126,8 @@ module.exports = function (options) {
     });
 
     file.contents = new Buffer(css);
+
+    log('file is a stream', file.isStream());
 
     //this.push(file);
     cb(null, file);
