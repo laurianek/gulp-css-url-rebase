@@ -128,9 +128,6 @@ module.exports = function (options) {
 
     file.contents = new Buffer(css);
 
-    log('file is a stream', fileContents, css);
-
-    //this.push(file);
     cb(null, file);
   });
 };
