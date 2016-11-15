@@ -48,7 +48,7 @@ var rebaseUrls = function (css, options) {
       }
       log('default url', _url);
       var pathParts = _url.split('?'),
-        q = pathParts[1];
+        q = pathParts[1],
         url = pathParts[0] || '';
       var urlExtName = path.extname(url),
         processedUrl = path.parse(url),
