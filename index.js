@@ -119,7 +119,8 @@ module.exports = function (options) {
       rerootPath = '';
     }
 
-    var css = rebaseUrls(file.contents.toString(), {
+    var fileContents = file.contents.toString();
+    var css = rebaseUrls(fileContents, {
       currentDir: fileDir,
       root: path.join(file.cwd, root, rerootPath),
       debug: debug
@@ -127,7 +128,7 @@ module.exports = function (options) {
 
     file.contents = new Buffer(css);
 
-    log('file is a stream', file.isStream());
+    log('file is a stream', fileContents, css);
 
     //this.push(file);
     cb(null, file);
