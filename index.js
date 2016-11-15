@@ -9,15 +9,15 @@ var chalk = require('chalk');
 var dateFormat = require('dateformat');
 
 const PLUGIN_NAME = 'gulp-css-url-rebase';
+const FONT_FORMATS = ['.eot', '.ttf', '.woff', '.woff2'];
 
 function log() {
   var args = [].slice.call(arguments, 0),
     now = Date.now(),
-    time = '[' + chalk.gray(dateFormat(now, 'isoTime')) + '] ';
+    time = '[' + chalk.gray(dateFormat(now, 'isoTime')) + '] ',
+    debug = chalk.blue('debug ');
 
-  args.forEach(a => {
-    console.log(time + chalk.blue('debug') + ' ' + a);
-  });
+  console.log.apply(this, [time, debug].concat(args));
 }
 
 var isAbsolute = function (p) {
@@ -47,14 +47,26 @@ var rebaseUrls = function (css, options) {
         return url;
       }
       log('default url', url);
-      var absolutePath = path.join(options.currentDir, url);
-      var p = path.relative(options.root, absolutePath);
+      var urlExtName = path.extname(url),
+        processedUrl = path.parse(url);
 
-      if (process.platform === 'win32') {
-        p = p.replace(/\\/g, '/');
+      if (FONT_FORMATS.indexOf(urlExtName) !== -1) {
+        processedUrl.dir = '../fonts';
+        return path.format(processedUrl);
       }
-      log('new url', p);
-      return p;
+
+      if (processedUrl.dir === '../images') {
+        return path.format(processedUrl);
+      }
+
+      var subDir = path.parse(processedUrl.dir);
+      subDir.dir = '../images';
+
+      var dir = path.format(subDir);
+      processedUrl.dir = dir;
+
+      log('new url', path.format(processedUrl));
+      return path.format(processedUrl);
     })).toString();
 };
 
