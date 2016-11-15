@@ -74,8 +74,15 @@ var rebaseUrls = function (css, options) {
       }
 
       subDir = path.parse(processedUrl.dir);
-      subDir.dir = '../images';
 
+      if (subDir.base === '') {
+        processedUrl.dir = '../images';
+        result = getFinalUrl(path.format(processedUrl), q);
+        debug && log('new url', result);
+        return result;
+      }
+
+      subDir.dir = '../images';
       processedUrl.dir = path.format(subDir);
       result = getFinalUrl(path.format(processedUrl), q);
 
