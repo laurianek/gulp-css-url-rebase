@@ -5,6 +5,20 @@ var rework = require('rework');
 var reworkUrl = require('rework-plugin-url');
 var through = require('through2');
 var validator = require('validator');
+var chalk = require('chalk');
+var dateFormat = require('dateformat');
+
+const PLUGIN_NAME = 'gulp-css-url-rebase';
+
+function log() {
+  var args = [].slice.call(arguments, 0),
+    now = Date.now(),
+    time = '[' + chalk.gray(dateFormat(now, 'isoTime')) + '] ';
+
+  args.forEach(a => {
+    console.log(time + chalk.blue('debug') + ' ' + a);
+  });
+}
 
 var isAbsolute = function (p) {
   var normal = path.normalize(p);
@@ -24,7 +38,7 @@ var isUrl = function (url) {
   }
 
   return validator.isURL(url, { require_protocol: true });
-}
+};
 
 var rebaseUrls = function (css, options) {
   return rework(css)
@@ -32,14 +46,14 @@ var rebaseUrls = function (css, options) {
       if (isAbsolute(url) || isUrl(url) || /^(data:.*;.*,)/.test(url)) {
         return url;
       }
-
+      log('default url', url);
       var absolutePath = path.join(options.currentDir, url);
       var p = path.relative(options.root, absolutePath);
 
       if (process.platform === 'win32') {
         p = p.replace(/\\/g, '/');
       }
-
+      log('new url', p);
       return p;
     })).toString();
 };
