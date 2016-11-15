@@ -119,7 +119,7 @@ module.exports = function (options) {
 
     file.contents = new Buffer(css);
 
-    this.push(file);
-    cb();
+    //this.push(file);
+    cb(null, file);
   });
 };
