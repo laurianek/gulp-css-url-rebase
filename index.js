@@ -40,6 +40,10 @@ var isUrl = function (url) {
   return validator.isURL(url, { require_protocol: true });
 };
 
+function getFinalUrl(url, queryStr) {
+  return [url, queryStr].filter(a => !!a).join('?');
+}
+
 var rebaseUrls = function (css, options) {
   return rework(css)
     .use(reworkUrl(function (_url) {
@@ -56,15 +60,13 @@ var rebaseUrls = function (css, options) {
 
       if (FONT_FORMATS.indexOf(urlExtName) !== -1) {
         processedUrl.dir = '../fonts';
-        result = path.format(processedUrl);
-        result += q;
+        result = getFinalUrl(path.format(processedUrl), q);
         log('new url', result);
         return result;
       }
 
       if (processedUrl.dir === '../images') {
-        result = path.format(processedUrl);
-        result += q;
+        result = getFinalUrl(path.format(processedUrl), q);
         log('new url', result);
         return result;
       }
@@ -73,8 +75,7 @@ var rebaseUrls = function (css, options) {
       subDir.dir = '../images';
 
       processedUrl.dir = path.format(subDir);
-      result = path.format(processedUrl);
-      result += q;
+      result = getFinalUrl(path.format(processedUrl), q);
 
       log('new url', result);
       return result;
