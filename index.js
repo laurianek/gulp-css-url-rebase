@@ -42,31 +42,42 @@ var isUrl = function (url) {
 
 var rebaseUrls = function (css, options) {
   return rework(css)
-    .use(reworkUrl(function (url) {
-      if (isAbsolute(url) || isUrl(url) || /^(data:.*;.*,)/.test(url)) {
-        return url;
+    .use(reworkUrl(function (_url) {
+      if (isAbsolute(_url) || isUrl(_url) || /^(data:.*;.*,)/.test(_url)) {
+        return _url;
       }
-      log('default url', url);
+      log('default url', _url);
+      var pathParts = _url.split('?'),
+        q = pathParts[1];
+        url = pathParts[0] || '';
       var urlExtName = path.extname(url),
-        processedUrl = path.parse(url);
+        processedUrl = path.parse(url),
+        result, subDir;
 
       if (FONT_FORMATS.indexOf(urlExtName) !== -1) {
         processedUrl.dir = '../fonts';
-        return path.format(processedUrl);
+        result = path.format(processedUrl);
+        result += q;
+        log('new url', result);
+        return result;
       }
 
       if (processedUrl.dir === '../images') {
-        return path.format(processedUrl);
+        result = path.format(processedUrl);
+        result += q;
+        log('new url', result);
+        return result;
       }
 
-      var subDir = path.parse(processedUrl.dir);
+      subDir = path.parse(processedUrl.dir);
       subDir.dir = '../images';
 
-      var dir = path.format(subDir);
-      processedUrl.dir = dir;
+      processedUrl.dir = path.format(subDir);
+      result = path.format(processedUrl);
+      result += q;
 
-      log('new url', path.format(processedUrl));
-      return path.format(processedUrl);
+      log('new url', result);
+      return result;
     })).toString();
 };
 
