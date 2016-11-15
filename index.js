@@ -50,7 +50,9 @@ var rebaseUrls = function (css, options) {
       if (isAbsolute(_url) || isUrl(_url) || /^(data:.*;.*,)/.test(_url)) {
         return _url;
       }
-      log('default url', _url);
+      var debug = options.debug;
+
+      debug && log('def url', _url);
       var pathParts = _url.split('?'),
         q = pathParts[1],
         url = pathParts[0] || '';
@@ -61,13 +63,13 @@ var rebaseUrls = function (css, options) {
       if (FONT_FORMATS.indexOf(urlExtName) !== -1) {
         processedUrl.dir = '../fonts';
         result = getFinalUrl(path.format(processedUrl), q);
-        log('new url', result);
+        debug && log('new url', result);
         return result;
       }
 
-      if (processedUrl.dir === '../images') {
+      if (processedUrl.dir === '../images' || processedUrl.dir === '../fonts') {
         result = getFinalUrl(path.format(processedUrl), q);
-        log('new url', result);
+        debug && log('new url', result);
         return result;
       }
 
@@ -77,7 +79,7 @@ var rebaseUrls = function (css, options) {
       processedUrl.dir = path.format(subDir);
       result = getFinalUrl(path.format(processedUrl), q);
 
-      log('new url', result);
+      debug && log('new url', result);
       return result;
     })).toString();
 };
@@ -86,6 +88,7 @@ module.exports = function (options) {
   options = options || {};
   var root = options.root || '.';
   var reroot = options.reroot || '';
+  var debug = options.debug || false;
 
   return through.obj(function (file, enc, cb) {
     var fileDir = path.dirname(file.path);
@@ -103,7 +106,8 @@ module.exports = function (options) {
 
     var css = rebaseUrls(file.contents.toString(), {
       currentDir: fileDir,
-      root: path.join(file.cwd, root, rerootPath)
+      root: path.join(file.cwd, root, rerootPath),
+      debug: debug
     });
 
     file.contents = new Buffer(css);
