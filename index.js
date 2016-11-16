@@ -51,7 +51,8 @@ var rebaseUrls = function (css, options) {
       if (isAbsolute(_url) || isUrl(_url) || /^(data:.*;.*,)/.test(_url)) {
         return _url;
       }
-      var {debug, urlTransform} = options;
+      var debug = options.debug;
+      var urlTransform = options.urlTransform;
 
       debug && log('def url', _url);
       var pathParts = _url.split('?'),
