@@ -40,8 +40,9 @@ var isUrl = function (url) {
   return validator.isURL(url, { require_protocol: true });
 };
 
-function getFinalUrl(url, queryStr) {
-  return [url, queryStr].filter(a => !!a).join('?');
+function getFinalUrl(url, queryStr, urlTransform) {
+  var newUrl = [url, queryStr].filter(a => !!a).join('?');
+  return urlTransform(newUrl);
 }
 
 var rebaseUrls = function (css, options) {
@@ -50,7 +51,7 @@ var rebaseUrls = function (css, options) {
       if (isAbsolute(_url) || isUrl(_url) || /^(data:.*;.*,)/.test(_url)) {
         return _url;
       }
-      var debug = options.debug;
+      var {debug, urlTransform} = options;
 
       debug && log('def url', _url);
       var pathParts = _url.split('?'),
@@ -62,13 +63,13 @@ var rebaseUrls = function (css, options) {
 
       if (FONT_FORMATS.indexOf(urlExtName) !== -1) {
         processedUrl.dir = '../fonts';
-        result = getFinalUrl(path.format(processedUrl), q);
+        result = getFinalUrl(path.format(processedUrl), q, urlTransform);
         debug && log('new url', result);
         return result;
       }
 
       if (processedUrl.dir === '../images' || processedUrl.dir === '../fonts') {
-        result = getFinalUrl(path.format(processedUrl), q);
+        result = getFinalUrl(path.format(processedUrl), q, urlTransform);
         debug && log('new url', result);
         return result;
       }
@@ -77,26 +78,22 @@ var rebaseUrls = function (css, options) {
 
       if (subDir.base === '' || /ima?g/.test(subDir.base)) {
         processedUrl.dir = '../images';
-        result = getFinalUrl(path.format(processedUrl), q);
+        result = getFinalUrl(path.format(processedUrl), q, urlTransform);
         debug && log('new url', result);
         return result;
       }
 
       subDir.dir = '../images';
       processedUrl.dir = path.format(subDir);
-      result = getFinalUrl(path.format(processedUrl), q);
+      result = getFinalUrl(path.format(processedUrl), q, urlTransform);
 
       debug && log('new url', result);
       return result;
     })).toString();
 };
 
-function urlRebaseStream() {
-  function prefixStream(prefixText) {
-    var stream = through();
-    stream.write(prefixText);
-    return stream;
-  }
+function identityFn(i) {
+  return i;
 }
 
 module.exports = function (options) {
@@ -104,6 +101,7 @@ module.exports = function (options) {
   var root = options.root || '.';
   var reroot = options.reroot || '';
   var debug = options.debug || false;
+  var urlTransform = options.urlTransform || identityFn;
 
   return through.obj(function (file, enc, cb) {
     var fileDir = path.dirname(file.path);
@@ -123,7 +121,8 @@ module.exports = function (options) {
     var css = rebaseUrls(fileContents, {
       currentDir: fileDir,
       root: path.join(file.cwd, root, rerootPath),
-      debug: debug
+      debug: debug,
+      urlTransform: urlTransform
     });
 
     file.contents = new Buffer(css);
