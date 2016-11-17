@@ -1,6 +1,6 @@
 {
   "name": "gulp-css-url-rebase",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Rebase relative image URLs",
   "main": "index.js",
   "dependencies": {
