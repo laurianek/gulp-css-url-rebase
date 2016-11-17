@@ -40,9 +40,12 @@ var isUrl = function (url) {
   return validator.isURL(url, { require_protocol: true });
 };
 
-function getFinalUrl(url, queryStr, urlTransform) {
-  var newUrl = [url, queryStr].filter(a => !!a).join('?');
-  return urlTransform(newUrl);
+function getFinalUrl(urlTransform, debug) {
+  return function _getFinalUrl(url, queryStr) {
+    var newUrl = [url, queryStr].filter(a => !!a).join('?');
+    debug && log('new url', newUrl);
+    return urlTransform(newUrl);
+  }
 }
 
 var rebaseUrls = function (css, options) {
@@ -52,7 +55,7 @@ var rebaseUrls = function (css, options) {
         return _url;
       }
       var debug = options.debug;
-      var urlTransform = options.urlTransform;
+      var getFinalUrlFn = getFinalUrl(options.urlTransform, debug);
 
       debug && log('def url', _url);
       var pathParts = _url.split('?'),
@@ -60,36 +63,29 @@ var rebaseUrls = function (css, options) {
         url = pathParts[0] || '';
       var urlExtName = path.extname(url),
         processedUrl = path.parse(url),
+        fontsDir = '../../fonts',
+        imagesDir = '../../images',
         result, subDir;
 
-      if (FONT_FORMATS.indexOf(urlExtName) !== -1) {
-        processedUrl.dir = '../fonts';
-        result = getFinalUrl(path.format(processedUrl), q, urlTransform);
-        debug && log('new url', result);
-        return result;
+      if (FONT_FORMATS.indexOf(urlExtName) !== -1 || processedUrl.dir === '../fonts') {
+        processedUrl.dir = fontsDir;
+        return getFinalUrlFn(path.format(processedUrl), q);
       }
 
-      if (processedUrl.dir === '../images' || processedUrl.dir === '../fonts') {
-        result = getFinalUrl(path.format(processedUrl), q, urlTransform);
-        debug && log('new url', result);
-        return result;
+      if (processedUrl.dir === imagesDir) {
+        return getFinalUrl(path.format(processedUrl), q);
       }
 
       subDir = path.parse(processedUrl.dir);
 
       if (subDir.base === '' || /ima?g/.test(subDir.base)) {
-        processedUrl.dir = '../images';
-        result = getFinalUrl(path.format(processedUrl), q, urlTransform);
-        debug && log('new url', result);
-        return result;
+        processedUrl.dir = imagesDir;
+        return getFinalUrlFn(path.format(processedUrl), q);
       }
 
-      subDir.dir = '../images';
+      subDir.dir = imagesDir;
       processedUrl.dir = path.format(subDir);
-      result = getFinalUrl(path.format(processedUrl), q, urlTransform);
-
-      debug && log('new url', result);
-      return result;
+      return getFinalUrlFn(path.format(processedUrl), q);
     })).toString();
 };
 
