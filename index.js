@@ -48,6 +48,10 @@ function getFinalUrl(urlTransform, debug) {
   }
 }
 
+function formatPath(pathObj) {
+  return pathObj.dir + '/' + pathObj.base
+}
+
 var rebaseUrls = function (css, options) {
   return rework(css)
     .use(reworkUrl(function (_url) {
@@ -69,23 +73,23 @@ var rebaseUrls = function (css, options) {
 
       if (FONT_FORMATS.indexOf(urlExtName) !== -1 || processedUrl.dir === '../fonts') {
         processedUrl.dir = fontsDir;
-        return getFinalUrlFn(path.format(processedUrl), q);
+        return getFinalUrlFn(formatPath(processedUrl), q);
       }
 
       if (processedUrl.dir === imagesDir) {
-        return getFinalUrl(path.format(processedUrl), q);
+        return getFinalUrl(formatPath(processedUrl), q);
       }
 
       subDir = path.parse(processedUrl.dir);
 
       if (subDir.base === '' || /ima?g/.test(subDir.base)) {
         processedUrl.dir = imagesDir;
-        return getFinalUrlFn(path.format(processedUrl), q);
+        return getFinalUrlFn(formatPath(processedUrl), q);
       }
 
       subDir.dir = imagesDir;
-      processedUrl.dir = path.format(subDir);
-      return getFinalUrlFn(path.format(processedUrl), q);
+      processedUrl.dir = formatPath(subDir);
+      return getFinalUrlFn(formatPath(processedUrl), q);
     })).toString();
 };
 
